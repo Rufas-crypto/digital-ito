@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-const socket = io.connect("http://localhost:3001");
+const socket = io.connect(process.env.REACT_APP_SERVER_URL || "http://localhost:3001");
 
 // --- ゲームルーム画面のコンポーネント ---
 function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
