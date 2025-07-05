@@ -41,6 +41,19 @@ io.on('connection', (socket) => {
 
   socket.on("join_room", (data) => {
     const { room, nickname } = data;
+
+    // ルーム名の検証
+    if (!room || typeof room !== 'string' || room.length < 1 || room.length > 20 || !/^[a-zA-Z0-9]+$/.test(room)) {
+      socket.emit("error_message", "ルーム名は1〜20文字の英数字で入力してください。");
+      return;
+    }
+
+    // ニックネームの検証
+    if (!nickname || typeof nickname !== 'string' || nickname.length < 1 || nickname.length > 20 || !/^[a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+$/.test(nickname)) {
+      socket.emit("error_message", "ニックネームは1〜20文字の英数字、ひらがな、カタカナ、漢字で入力してください。");
+      return;
+    }
+
     socket.join(room);
     console.log(`ユーザー ${socket.id} (ニックネーム: ${nickname}) がルーム ${room} に参加しました`);
 
@@ -80,6 +93,13 @@ io.on('connection', (socket) => {
     lastEventTime[socket.id] = now;
 
     const { answer } = data;
+
+    // 回答の検証
+    if (!answer || typeof answer !== 'string' || answer.length < 1 || answer.length > 100) {
+      socket.emit("error_message", "回答は1〜100文字で入力してください。");
+      return;
+    }
+
     for (const roomName in rooms) {
       if (rooms[roomName].players[socket.id]) {
         const room = rooms[roomName];
@@ -109,52 +129,85 @@ io.on('connection', (socket) => {
   });
 
   socket.on("show_result", () => {
-    for (const roomName in rooms) {
-      const room = rooms[roomName];
-      if (room.players[socket.id] && socket.id === room.hostId) { // ホストのみ実行可能
-        room.isResultShown = true;
-        io.to(roomName).emit("game_update", room);
-        break;
+    try {
+      for (const roomName in rooms) {
+        const room = rooms[roomName];
+        if (room.players[socket.id]) {
+          if (socket.id === room.hostId) { // ホストのみ実行可能
+            room.isResultShown = true;
+            io.to(roomName).emit("game_update", room);
+            return; // 処理完了
+          } else {
+            socket.emit("error_message", "ホストのみが結果を表示できます。");
+            return; // 権限なし
+          }
+        }
       }
+      socket.emit("error_message", "参加中のルームが見つかりません。");
+    } catch (error) {
+      console.error(`show_result エラー: ${error.message}`);
+      socket.emit("error_message", "サーバーでエラーが発生しました。");
     }
   });
 
   socket.on("reset_game", () => {
-    for (const roomName in rooms) {
-      const room = rooms[roomName];
-      if (room.players[socket.id] && socket.id === room.hostId) { // ホストのみ実行可能
-        console.log(`ルーム ${roomName} のゲームをリセットします`);
-        const newAvailableNumbers = generateNumbers();
-        room.theme = themes[Math.floor(Math.random() * themes.length)];
-        room.isResultShown = false;
-        room.orderedPlayerIds = [];
+    try {
+      for (const roomName in rooms) {
+        const room = rooms[roomName];
+        if (room.players[socket.id]) {
+          if (socket.id === room.hostId) { // ホストのみ実行可能
+            console.log(`ルーム ${roomName} のゲームをリセットします`);
+            const newAvailableNumbers = generateNumbers();
+            room.theme = themes[Math.floor(Math.random() * themes.length)];
+            room.isResultShown = false;
+            room.orderedPlayerIds = [];
 
-        for (const playerId in room.players) {
-          const player = room.players[playerId];
-          player.answer = "";
-          player.isReady = false;
-          const randomIndex = Math.floor(Math.random() * newAvailableNumbers.length);
-          const assignedNumber = newAvailableNumbers.splice(randomIndex, 1)[0];
-          player.number = assignedNumber;
-          io.to(playerId).emit("your_card", { number: assignedNumber });
+            for (const playerId in room.players) {
+              const player = room.players[playerId];
+              player.answer = "";
+              player.isReady = false;
+              const randomIndex = Math.floor(Math.random() * newAvailableNumbers.length);
+              const assignedNumber = newAvailableNumbers.splice(randomIndex, 1)[0];
+              player.number = assignedNumber;
+              io.to(playerId).emit("your_card", { number: assignedNumber });
+            }
+            room.availableNumbers = newAvailableNumbers;
+            io.to(roomName).emit("game_update", room);
+            return; // 処理完了
+          } else {
+            socket.emit("error_message", "ホストのみがゲームをリセットできます。");
+            return; // 権限なし
+          }
         }
-        room.availableNumbers = newAvailableNumbers;
-        io.to(roomName).emit("game_update", room);
-        break;
       }
+      socket.emit("error_message", "参加中のルームが見つかりません。");
+    } catch (error) {
+      console.error(`reset_game エラー: ${error.message}`);
+      socket.emit("error_message", "サーバーでエラーが発生しました。");
     }
   });
 
   // 新しい解散イベント
   socket.on("disband_room", () => {
-    for (const roomName in rooms) {
-      const room = rooms[roomName];
-      if (room.players[socket.id] && socket.id === room.hostId) { // ホストのみ実行可能
-        console.log(`ホストがルーム ${roomName} を解散しました`);
-        io.to(roomName).emit("room_disbanded"); // 全員に解散を通知
-        delete rooms[roomName]; // サーバーからルーム情報を削除
-        break;
+    try {
+      for (const roomName in rooms) {
+        const room = rooms[roomName];
+        if (room.players[socket.id]) {
+          if (socket.id === room.hostId) { // ホストのみ実行可能
+            console.log(`ホストがルーム ${roomName} を解散しました`);
+            io.to(roomName).emit("room_disbanded"); // 全員に解散を通知
+            delete rooms[roomName]; // サーバーからルーム情報を削除
+            return; // 処理完了
+          } else {
+            socket.emit("error_message", "ホストのみがルームを解散できます。");
+            return; // 権限なし
+          }
+        }
       }
+      socket.emit("error_message", "参加中のルームが見つかりません。");
+    } catch (error) {
+      console.error(`disband_room エラー: ${error.message}`);
+      socket.emit("error_message", "サーバーでエラーが発生しました。");
     }
   });
 
