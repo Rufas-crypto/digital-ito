@@ -21,6 +21,11 @@ const themes = ["一番人気な映画", "もらって嬉しいプレゼント",
 
 const generateNumbers = () => Array.from({ length: 100 }, (_, i) => i + 1);
 
+// レートリミット設定
+const RATE_LIMIT_INTERVAL = 1000; // 1秒
+const RATE_LIMIT_MAX_EVENTS = 1; // 1秒間に1イベントまで
+const lastEventTime = {}; // 各ソケットの最終イベント送信時刻を記録
+
 // ルームの初期状態に hostId を追加
 const createNewRoomState = () => ({
   players: {},
@@ -66,6 +71,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on("submit_answer", (data) => {
+    // レートリミットチェック
+    const now = Date.now();
+    if (lastEventTime[socket.id] && (now - lastEventTime[socket.id] < RATE_LIMIT_INTERVAL)) {
+      console.warn(`レートリミット超過: ${socket.id} が submit_answer を短期間に送信しようとしました`);
+      return; // イベントを無視
+    }
+    lastEventTime[socket.id] = now;
+
     const { answer } = data;
     for (const roomName in rooms) {
       if (rooms[roomName].players[socket.id]) {
