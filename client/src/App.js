@@ -190,6 +190,19 @@ function App() {
   const [gameState, setGameState] = useState(null);
   const [myCard, setMyCard] = useState(null);
 
+  // BGMの準備
+  const bgm = new Audio('/sounds/game_bgm.mp3'); // BGMファイルのパス
+  bgm.loop = true; // ループ再生を有効にする
+
+  useEffect(() => {
+    if (showGame) {
+      bgm.play().catch(e => console.error("BGM再生エラー:", e));
+    } else {
+      bgm.pause();
+      bgm.currentTime = 0; // 再生位置を最初に戻す
+    }
+  }, [showGame]);
+
   useEffect(() => {
     socket.on("your_card", (data) => setMyCard(data.number));
     socket.on("game_update", (data) => setGameState(data));
