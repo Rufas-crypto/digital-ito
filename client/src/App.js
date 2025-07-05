@@ -41,6 +41,28 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
     }
   };
 
+  // 効果音の準備
+  const correctSound = new Audio('/sounds/correct.mp3'); // 正解音のパス
+  const incorrectSound = new Audio('/sounds/incorrect.mp3'); // 不正解音のパス
+
+  useEffect(() => {
+    if (gameState && gameState.isResultShown) {
+      let isCorrect = true;
+      const orderedPlayers = gameState.orderedPlayerIds.map(id => gameState.players[id]);
+      for (let i = 0; i < orderedPlayers.length - 1; i++) {
+        if (orderedPlayers[i].number > orderedPlayers[i+1].number) {
+          isCorrect = false;
+          break;
+        }
+      }
+      if (isCorrect) {
+        correctSound.play();
+      } else {
+        incorrectSound.play();
+      }
+    }
+  }, [gameState]); // gameState が変更されたときに実行
+
   if (!gameState) {
     return <div>Loading...</div>;
   }
@@ -74,7 +96,7 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
         <div className="col-md-4">
           <div className="card mb-3">
             <div className="card-header">あなたのカード</div>
-            <div className="card-body text-center">
+            <div className="card-body d-flex align-items-center justify-content-center" style={{ minHeight: '150px' }}>
               <h1 className="display-1">{myCard !== null ? myCard : '？'}</h1>
             </div>
           </div>
@@ -106,6 +128,9 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
         <div className="col-md-8">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h4>ゲームボード</h4>
+            {isHost && !gameState.isResultShown && (
+              <button className="btn btn-info me-2" onClick={startNewGame}>お題を変更する</button>
+            )}
             {allPlayersReady && !gameState.isResultShown && isHost && (
               <button className="btn btn-success" onClick={showResult}>結果を見る！</button>
             )}
@@ -114,7 +139,7 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
             )}
             {gameState.isResultShown && isHost && (
               <div>
-                <button className="btn btn-warning me-2" onClick={startNewGame}>新しいゲームを始める</button>
+                <button className="btn btn-warning me-2" onClick={startNewGame}>お題を変更して新しいゲームを始める</button>
                 <button className="btn btn-danger" onClick={disbandRoom}>ルームを解散する</button>
               </div>
             )}

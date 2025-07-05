@@ -17,7 +17,7 @@ const io = new Server(server, {
 });
 
 const rooms = {};
-const themes = ["一番人気な映画", "もらって嬉しいプレゼント", "最強の動物", "住みたい街", "あったら嬉しいドラえもんの道具"];
+const themes = require('./data/themes.json');
 
 const generateNumbers = () => Array.from({ length: 100 }, (_, i) => i + 1);
 

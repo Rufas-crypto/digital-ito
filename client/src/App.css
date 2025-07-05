@@ -36,3 +36,77 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom styles for ITO game */
+body {
+  background-color: #f0f2f5; /* Light gray background */
+}
+
+.container {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+h1 {
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.display-1 {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.p-3.border.rounded.bg-light {
+  background-color: #e9ecef !important; /* Lighter background for drag area */
+  border: 2px dashed #ced4da !important;
+}
+
+.p-3.border.rounded.d-flex {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.p-3.border.rounded.d-flex:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert {
+  border-radius: 10px;
+}
+
+.alert-heading {
+  font-weight: bold;
+}
+
+.badge {
+  font-size: 0.9em;
+}
