@@ -182,8 +182,7 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
   );
 }
 
-// --- アプリケーション全体のコンポーネント ---
-function App() {
+
   const [nickname, setNickname] = useState('');
   const [room, setRoom] = useState('');
   const [showGame, setShowGame] = useState(false);
@@ -274,8 +273,7 @@ function App() {
 
 
 
-// --- アプリケーション全体のコンポーネント ---
-function App() {
+
   const [nickname, setNickname] = useState('');
   const [room, setRoom] = useState('');
   const [showGame, setShowGame] = useState(false);
