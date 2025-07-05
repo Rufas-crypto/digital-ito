@@ -91,7 +91,7 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
         )}
       </div>
 
-      <div className="row">
+      <div className="row flex-column flex-md-row">
         {/* 左側 */}
         <div className="col-md-4">
           <div className="card mb-3">
@@ -154,7 +154,7 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
                   <div className="text-center text-muted small fw-bold">小さい（と予想） ▲</div>
                   <div className="mt-2 mb-2 flex-grow-1">
                     {orderedPlayers.map((player, index) => (
-                      <Draggable key={player.id} draggableId={player.id} index={index} isDragDisabled={gameState.isResultShown}>
+                      <Draggable key={player.id} draggableId={player.id} index={index} isDragDisabled={!isHost || gameState.isResultShown}>
                         {(provided) => (
                           <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-2">
                             <div className="p-3 border rounded d-flex justify-content-between align-items-center">
