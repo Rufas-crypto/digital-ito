@@ -182,7 +182,8 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
   );
 }
 
-
+// --- アプリケーション全体のコンポーネント ---
+function App() {
   const [nickname, setNickname] = useState('');
   const [room, setRoom] = useState('');
   const [showGame, setShowGame] = useState(false);
@@ -260,102 +261,11 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
           </div>
         </div>
       ) : (
-        <GameRoom 
-          nickname={nickname} 
-          room={room} 
-          gameState={gameState} 
-          myCard={myCard} 
-        />
-      )}
-    </div>
-  );
-}
-
-
-
-
-  const [nickname, setNickname] = useState('');
-  const [room, setRoom] = useState('');
-  const [showGame, setShowGame] = useState(false);
-  const [gameState, setGameState] = useState(null);
-  const [myCard, setMyCard] = useState(null);
-
-  // BGMの準備
-  const bgm = new Audio('/sounds/game_bgm.mp3'); // BGMファイルのパス
-  bgm.loop = true; // ループ再生を有効にする
-  bgm.volume = 0.2; // BGMの音量を小さくする (例: 20%)
-
-  useEffect(() => {
-    if (showGame) {
-      bgm.play().catch(e => console.error("BGM再生エラー:", e));
-    } else {
-      bgm.pause();
-      bgm.currentTime = 0; // 再生位置を最初に戻す
-    }
-  }, [showGame]);
-
-  useEffect(() => {
-    socket.on("your_card", (data) => setMyCard(data.number));
-    socket.on("game_update", (data) => setGameState(data));
-    socket.on("room_disbanded", () => {
-      alert("ホストがルームを解散しました。");
-      setShowGame(false); // 最初の画面に戻る
-      setGameState(null);
-      setMyCard(null);
-    });
-    socket.on("error_message", (message) => alert(message));
-
-    return () => {
-      socket.off("your_card");
-      socket.off("game_update");
-      socket.off("room_disbanded");
-      socket.off("error_message");
-    };
-  }, []);
-
-  const joinRoom = () => {
-    const cleanNickname = nickname.trim().replace(/[<>]/g, '');
-    const cleanRoom = room.trim().replace(/[<>]/g, '');
-    if (cleanNickname !== "" && cleanRoom !== "") {
-      socket.emit("join_room", { room: cleanRoom, nickname: cleanNickname });
-      setShowGame(true);
-    } else {
-      alert("ニックネームとルーム名を入力してください。");
-    }
-  };
-
-  return (
-    <div className="container mt-4 mb-4">
-      <header className="text-center mb-4">
-        <h1>ito デジタル</h1>
-      </header>
-      {!showGame ? (
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title text-center">ゲームに参加</h3>
-                <div className="mb-3">
-                  <label htmlFor="nickname" className="form-label">ニックネーム</label>
-                  <input type="text" className="form-control" id="nickname" maxLength="15" placeholder="15文字以内" onChange={(e) => setNickname(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && joinRoom()} />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="room" className="form-label">ルーム名</label>
-                  <input type="text" className="form-control" id="room" maxLength="15" placeholder="参加したい部屋の名前" onChange={(e) => setRoom(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && joinRoom()} />
-                </div>
-                <div className="d-grid">
-                  <button className="btn btn-primary" onClick={joinRoom}>参加する</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <GameRoom 
-          nickname={nickname} 
-          room={room} 
-          gameState={gameState} 
-          myCard={myCard} 
+        <GameRoom
+          nickname={nickname}
+          room={room}
+          gameState={gameState}
+          myCard={myCard}
         />
       )}
     </div>
