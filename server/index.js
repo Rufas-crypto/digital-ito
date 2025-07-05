@@ -158,7 +158,14 @@ io.on('connection', (socket) => {
           if (socket.id === room.hostId) { // ホストのみ実行可能
             console.log(`ルーム ${roomName} のゲームをリセットします`);
             const newAvailableNumbers = generateNumbers();
-            room.theme = themes[Math.floor(Math.random() * themes.length)];
+            
+            let newTheme = room.theme;
+            // 直前のお題と同じにならないように再抽選
+            while (newTheme === room.theme) {
+              newTheme = themes[Math.floor(Math.random() * themes.length)];
+            }
+            room.theme = newTheme;
+
             room.isResultShown = false;
             room.orderedPlayerIds = [];
 
