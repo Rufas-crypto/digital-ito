@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const cors = require('cors');
+const sanitizeHtml = require('sanitize-html');
 
 const app = express();
 app.use(cors());
@@ -54,7 +55,7 @@ io.on('connection', (socket) => {
 
     rooms[room].players[socket.id] = {
       id: socket.id,
-      nickname: nickname,
+      nickname: sanitizeHtml(nickname, { allowedTags: [], allowedAttributes: {} }), // ニックネームをサニタイズ
       number: assignedNumber,
       answer: "",
       isReady: false
@@ -70,7 +71,7 @@ io.on('connection', (socket) => {
       if (rooms[roomName].players[socket.id]) {
         const room = rooms[roomName];
         const player = room.players[socket.id];
-        const sanitizedAnswer = answer.replace(/[<>]/g, '');
+        const sanitizedAnswer = sanitizeHtml(answer, { allowedTags: [], allowedAttributes: {} }); // 回答をサニタイズ
         player.answer = sanitizedAnswer;
         player.isReady = true;
         if (!room.orderedPlayerIds.includes(player.id)) {
