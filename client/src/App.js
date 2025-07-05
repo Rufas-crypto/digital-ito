@@ -137,6 +137,15 @@ function GameRoom({ nickname, room, gameState, myCard, resetGame }) {
             {allPlayersReady && !gameState.isResultShown && !isHost && (
               <span className="text-muted">ホストが結果発表するのを待っています...</span>
             )}
+            {!allPlayersReady && (
+              <span className="text-muted">
+                {isHost ? (
+                  <>全員の回答を待っています。回答を小さい順に並べ替えてください。<br />（注: 数字は直接教えないでください）</>
+                ) : (
+                  <>全員の回答を待っています。ホストの並べ替えをサポートしてください。<br />（注: 数字は直接教えないでください）</>
+                )}
+              </span>
+            )}
             {gameState.isResultShown && isHost && (
               <div>
                 <button className="btn btn-warning me-2" onClick={startNewGame}>お題を変更して新しいゲームを始める</button>

@@ -122,7 +122,7 @@ io.on('connection', (socket) => {
       if (rooms[roomName].players[socket.id]) {
         const room = rooms[roomName];
         room.orderedPlayerIds = orderedIds;
-        socket.to(roomName).emit("game_update", room);
+        io.to(roomName).emit("game_update", room);
         break;
       }
     }
